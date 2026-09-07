@@ -42,6 +42,15 @@ void gemmini_state_t::reset()
   // Norm reset
   for (int i = 0; i < NORM_STAT_IDS; i++) norm_reset[i] = true;
 
+  pfu_enabled = false;
+  pfu_function = 0;
+  pfu_mode = 0;
+  pfu_norm_mode = 0;
+  pfu_error = PFU_ERR_NONE;
+  pfu_processed_elements = 0;
+  pfu_range_clamps = 0;
+  pfu_table_writes = 0;
+
   // Dummy counter reset
   snapshot_enable = false;
   op_in_progress = false;
@@ -500,6 +509,27 @@ void gemmini_t::config(reg_t rs1, reg_t rs2) {
         dprintf("GEMMINI: config_mvout - rs1 is %llx\n", rs1);
     }
   } else if ((rs1 & 0b11) == 3) { // rs1[1:0] == 2'b11, config_norm, configure norm pipeline
+    if (PFU_CONFIG_NORM_IS_MARKER(rs1)) {
+      const unsigned funct = PFU_CONFIG_NORM_FUNCT(rs1);
+      switch (funct) {
+      case PFU_FUNC:
+        gemmini_state.pfu_function = PFU_FUNC_FUNCTION_ID(rs1);
+        gemmini_state.pfu_mode = PFU_FUNC_MODE(rs1);
+        gemmini_state.pfu_norm_mode = PFU_FUNC_NORM_MODE(rs1);
+        gemmini_state.pfu_enabled = PFU_FUNC_ENABLE(rs1);
+        break;
+      case PFU_COEF_W:
+        gemmini_state.pfu_table_writes++;
+        break;
+      case PFU_CLEAR_ERR:
+        gemmini_state.pfu_error = PFU_ERR_NONE;
+        break;
+      default:
+        gemmini_state.pfu_error = PFU_ERR_BAD_FUNCTION;
+        break;
+      }
+      return;
+    }
     gemmini_state.norm_stat_id = (rs1 >> 8) & 0xFF;
     if (!((rs1 >> 17) & 1)) { // set stat_id only
       gemmini_state.igelu_qb = rs2 & 0xFFFFFFFF;

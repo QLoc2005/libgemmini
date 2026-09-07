@@ -5,7 +5,11 @@
 #include <riscv/rocc.h>
 #include <random>
 #include <limits>
-#include "gemmini_params.h"
+#ifndef GEMMINI_PARAMS_HEADER
+#define GEMMINI_PARAMS_HEADER "gemmini_params.h"
+#endif
+#include GEMMINI_PARAMS_HEADER
+#include "pfu_abi.h"
 
 typedef acc_t output_t; // Systolic array output datatype (coming down from PEs, moving into accumulator)
 static const uint32_t sp_matrices = (BANK_NUM * BANK_ROWS) / DIM; // Size the scratchpad to fit sp_matrices matrices
@@ -19,7 +23,7 @@ static const uint64_t addr_len = ADDR_LEN; // Number of bits used to address the
 
 // WARNING: If you change this, you must also change the bits in the counter op config register decoding union in gemmini.cc.
 #define NUM_COUNTERS 8
-#define NUM_EXTERNAL_COUNTERS 6 
+#define NUM_EXTERNAL_COUNTERS 17
 
 #define MAKECUSTOMFN(opcode) custom ## opcode
 #define CUSTOMFN(opcode) MAKECUSTOMFN(opcode)
@@ -90,6 +94,15 @@ struct gemmini_state_t
   acc_scale_t norm_inv_stddev[NORM_STAT_IDS];
   acc_scale_t norm_inv_sum_exp[NORM_STAT_IDS];
   bool norm_reset[NORM_STAT_IDS];
+
+  bool pfu_enabled;
+  uint8_t pfu_function;
+  uint8_t pfu_mode;
+  uint8_t pfu_norm_mode;
+  uint8_t pfu_error;
+  uint32_t pfu_processed_elements;
+  uint32_t pfu_range_clamps;
+  uint32_t pfu_table_writes;
 
   // Counter
   uint32_t counter_val[NUM_COUNTERS];
