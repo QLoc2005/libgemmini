@@ -95,15 +95,6 @@ struct gemmini_state_t
   acc_scale_t norm_inv_sum_exp[NORM_STAT_IDS];
   bool norm_reset[NORM_STAT_IDS];
 
-  bool pfu_enabled;
-  uint8_t pfu_function;
-  uint8_t pfu_mode;
-  uint8_t pfu_norm_mode;
-  uint8_t pfu_error;
-  uint32_t pfu_processed_elements;
-  uint32_t pfu_range_clamps;
-  uint32_t pfu_table_writes;
-
   // Counter
   uint32_t counter_val[NUM_COUNTERS];
   uint32_t counter_snapshot_val[NUM_COUNTERS];
@@ -169,6 +160,8 @@ private:
   processor_t* p;
 
   const unsigned config_funct = 0;
+  const unsigned pfu_load_funct = 0x1a;
+  const unsigned pfu_config_funct = 0x1b;
   const unsigned mvin_funct = 2;
   const unsigned mvin2_funct = 1;
   const unsigned mvin3_funct = 14;
