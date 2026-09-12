@@ -23,7 +23,7 @@ static const uint64_t addr_len = ADDR_LEN; // Number of bits used to address the
 
 // WARNING: If you change this, you must also change the bits in the counter op config register decoding union in gemmini.cc.
 #define NUM_COUNTERS 8
-#define NUM_EXTERNAL_COUNTERS 17
+#define NUM_EXTERNAL_COUNTERS 16
 
 #define MAKECUSTOMFN(opcode) custom ## opcode
 #define CUSTOMFN(opcode) MAKECUSTOMFN(opcode)
